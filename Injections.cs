@@ -99,8 +99,15 @@ public class Injections
         using var conn = new NpgsqlConnection(ConnectionString);
         conn.Open();
 
+        // på username:
+        // a'; DROP TABLE transactions;--
+
+        // på username:
+        // admin' --
         string query =
             $"SELECT * FROM accounts WHERE username = '{username}' AND password = '{password}'";
+
+        // SELECT * FROM accounts WHERE username = 'admin'
 
         using var cmd = new NpgsqlCommand(query, conn);
         try
@@ -109,6 +116,8 @@ public class Injections
             if (reader.Read())
             {
                 Console.WriteLine($"\nLogged in successfully!");
+
+                // Hämta ut rad+kolumn baserat på kolumnens namn och [] syntax
                 Console.WriteLine($"Account ID: {reader["account_id"]}");
                 Console.WriteLine($"Balance: ${reader["balance"]}");
             }
@@ -142,8 +151,7 @@ public class Injections
                 $@"
                 UPDATE accounts 
                 SET balance = balance - {amount} 
-                WHERE account_id = {fromAccount} 
-                AND balance >= {amount}";
+                WHERE account_id = {fromAccount} AND balance >= {amount}";
 
             string creditQuery =
                 $@"
@@ -155,6 +163,13 @@ public class Injections
                 $@"
                 INSERT INTO transactions (from_account, to_account, amount, description)
                 VALUES ({fromAccount}, {toAccount}, {amount}, 'Transfer')";
+
+            Console.WriteLine(debitQuery);
+            Console.WriteLine();
+            Console.WriteLine(creditQuery);
+            Console.WriteLine();
+            Console.WriteLine(transactionQuery);
+
 
             using (var cmd = new NpgsqlCommand(debitQuery, conn, transaction))
             {
